@@ -40,13 +40,9 @@ COMMANDLINE,"path\tool.exe --destDir=c:\destDir --id=Datadog_API_Key",false
 
 You have to set your own values for the path and name of the tool, the backup destination and the API Key generated in your Datadog account.
 
-## Contributing
-
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
-
 ## Authors
 
-- **Angel Castro** - _Initial work_ - [Angel Castro](https://github.com/alcastro)
+- **Angel Castro** - _Initial work_ - [Angel Castro](https://github.com/alcastrob)
 
 See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
 
