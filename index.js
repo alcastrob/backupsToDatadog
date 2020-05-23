@@ -29,7 +29,7 @@ module.exports = async function (filePath, apiKey) {
             result.groups['hour'],
             result.groups['minute'],
             result.groups['second']
-          )
+          ),
         }
         switch (result.groups['type']) {
           case 'Completo':
@@ -44,9 +44,7 @@ module.exports = async function (filePath, apiKey) {
       }
     }
 
-    const {
-      free
-    } = await disk.check(require('path').resolve(fileName).substring(0, 2))
+    const { free } = await disk.check(require('path').resolve(fileName).substring(0, 2))
     logData(completes, differential, free, apiKey)
   } catch (err) {
     console.log(err)
@@ -56,43 +54,63 @@ module.exports = async function (filePath, apiKey) {
     const fc = _.head(_.sortBy(completes, ['timestamp']))
     const lc = _.last(_.sortBy(completes, ['timestamp']))
     const ld = _.last(_.sortBy(differential, ['timestamp']))
-    const dfc = fc.date
-    const dld = ld.date
 
+    // console.log('diff:', differential)
     sendMetric('backup.espacioLibre', freeSpace, 'gauge', apiKey)
-    sendMetric('backup.ventanaDias', (dld.getTime() - dfc.getTime()) / (1000 * 60 * 60 * 24), 'gauge', apiKey)
+
+    if (fc && ld) {
+      sendMetric('backup.ventanaDias', (ld.date.getTime() - fc.date.getTime()) / (1000 * 60 * 60 * 24), 'gauge', apiKey)
+    } else {
+      sendMetric('backup.ventanaDias', 0, 'gauge', apiKey)
+    }
     sendMetric('backup.totalBackups', completesArray.length + differentialsArray.length, 'gauge', apiKey)
     sendMetric('backup.totalCompletos', completesArray.length, 'gauge', apiKey)
     sendMetric('backup.totalDiferenciales', differentialsArray.length, 'gauge', apiKey)
 
-    sendLog(`Primero completo: ${fc.timestamp} ${fc.size}`, apiKey)
-    sendLog(`Ultimo completo: ${lc.timestamp} ${lc.size}`, apiKey)
-    sendLog(`Ultimo diferencial: ${ld.timestamp} ${ld.size}`, apiKey)
+    if (fc) {
+      sendLog(`Primero completo: ${fc.timestamp} ${fc.size}`, apiKey)
+    }
+    if (lc) {
+      sendLog(`Último completo: ${lc.timestamp} ${lc.size}`, apiKey)
+    }
+    if (ld) {
+      sendLog(`Último diferencial: ${ld.timestamp} ${ld.size}`, apiKey)
+    }
   }
 
   async function sendMetric(name, value, type, apiKey) {
     try {
       const ts = Math.trunc(new Date().getTime() / 1000)
-      const payload = `{"series": [{"host": "tiny", "metric": "${name}", "points": [[${ts}, ${value}]], "type": "${type}" }] }`
+      const payload = `{"series": [{"host": "${require('os').hostname()}", "metric": "${name}", "points": [[${ts}, ${value}]], "type": "${type}" }] }`
 
-      const response = await axios.post(`https://api.datadoghq.eu/api/v1/series?api_key=${apiKey}`, payload)
+      const response = await axios
+        .post(`https://api.datadoghq.eu/api/v1/series?api_key=${apiKey}`, payload)
+        .catch((error) => {
+          console.error(error)
+          throw error
+        })
       if (response.status < 200 || response.status > 202) {
         throw 'Error en la llamada remota: ' + response.status
       }
     } catch (err) {
-      console.error('Surgio un problema en el envío de las métricas.', err)
+      console.error('Surgió un problema en el envío de las métricas.', err)
     }
   }
 
   async function sendLog(message, apiKey) {
     try {
-      const response = await axios.post(`https://http-intake.logs.datadoghq.eu/v1/input/${apiKey}`, {
-        message: message,
-        status: 'info',
-        host: require("os").hostname(),
-        system: 'orma-backups',
-        version: require('./package.json').version
-      })
+      const response = await axios
+        .post(`https://http-intake.logs.datadoghq.eu/v1/input/${apiKey}`, {
+          message: message,
+          status: 'info',
+          host: require('os').hostname(),
+          system: 'orma-backups',
+          version: require('./package.json').version,
+        })
+        .catch((error) => {
+          console.error(error)
+          throw error
+        })
     } catch (err) {
       console.error('Surgio un problema en el envío de las trazas.', err)
     }
