@@ -14,8 +14,8 @@ You need Cobian backup installed in your system and an account in datadog for co
 
 For building the tool, you're going to need:
 
-- nodejs (at least v10)
-- pkg (for compiling the exe file)
+- [nodejs](https://nodejs.org/es/download/) (at least v10)
+- [pkg](https://www.npmjs.com/package/pkg) (for compiling the exe file)
 
 ## What things you need to install the software and how to install them
 
@@ -23,7 +23,7 @@ Clone the sources in your favorite directory and execute the following commands:
 
 ```
 npm i
-pkg -t node10-win-x64 .
+pkg -t node12-win-x64 .
 ```
 
 ## Deployment
@@ -39,6 +39,10 @@ COMMANDLINE,"path\tool.exe --destDir=c:\destDir --id=Datadog_API_Key",false
 ```
 
 You have to set your own values for the path and name of the tool, the backup destination and the API Key generated in your Datadog account.
+
+## Built With
+
+- [node 12.18.1](nodejs.org)
 
 ## Authors
 
