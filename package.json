@@ -10,7 +10,7 @@
   "bin": "bin.js",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "diskusage": "^1.1.3",
     "lodash": "^4.17.15",
     "number-abbreviate": "^2.0.0"
